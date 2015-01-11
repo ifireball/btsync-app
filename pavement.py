@@ -8,9 +8,11 @@ BUILD_DIR=path('build')
 WORK_DIR=BUILD_DIR / 'tmp'
 TARGET_DIR=BUILD_DIR / 'AppDir'
 DIR_MODE=0755
+EXE_MODE=0755
 
 class BtSync:
-    def __init__(self, version='1.4.103', platform='x86_64', workdir=WORK_DIR):
+    def __init__(self, version='1.4.103', platform='x86_64', workdir=WORK_DIR,
+            targetdir=TARGET_DIR):
         self.version = version
         self.platform = platform
         self.platform_nic = { 'x86_64': 'x64' }.get(self.platform, self.platform)
@@ -20,6 +22,9 @@ class BtSync:
         self.url ='http://syncapp.bittorrent.com/%s/%s' % (self.version,
                 self.archive_name)
         self.extract_path = workdir / self.file_base_name
+        self.binary_src_path = self.extract_path / 'btsync'
+        self.binary_target_dir = targetdir / 'usr' / 'lib' / 'btsync-common'
+        self.binary_target_path = self.binary_target_dir / 'btsync-core'
 
 class BtSyncDeb:
     def __init__(self, tag='btsync-1.4.1-1', workdir=WORK_DIR):
@@ -83,4 +88,12 @@ def install_btsync_gui():
             dst = TARGET_DIR / dst
             dst.makedirs(DIR_MODE)
             sh("cp --preserve=mode -frt '%s' '%s'" % (dst, src))
+
+@task
+@needs('get_btsync_bin')
+def install_btsync_bin():
+    btsync = BtSync()
+    btsync.binary_target_dir.makedirs(DIR_MODE)
+    sh("install -m %o '%s' '%s'" % (EXE_MODE, btsync.binary_src_path,
+        btsync.binary_target_path))
 
