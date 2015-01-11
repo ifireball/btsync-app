@@ -2,6 +2,7 @@
 # pavement.py - Paver file fore building BtSync AppImage
 #
 from paver.easy import path, task, needs, sh, pushd
+import re
 
 BUILD_DIR=path('build')
 WORK_DIR=BUILD_DIR / 'tmp'
@@ -30,6 +31,7 @@ class BtSyncDeb:
                 self.tag)
         self.extract_path = workdir / self.file_base_name
         self.gui_path = self.extract_path / 'btsync-gui'
+        self.install_file = self.gui_path / 'debian' / 'btsync-gui-gtk.install'
 
 @task
 def mk_build_dir():
@@ -42,17 +44,17 @@ def mk_build_dir():
 def get_btsync_bin():
     """Download the BtSync binary"""
     btsync = BtSync()
-    sh('curl -f %s -o %s' % (btsync.url, btsync.archive_path))
+    sh("curl -f '%s' -o '%s'" % (btsync.url, btsync.archive_path))
     btsync.extract_path.mkdir(DIR_MODE)
-    sh('tar -xvzf %s -C %s' % (btsync.archive_path, btsync.extract_path))
+    sh("tar -xvzf '%s' -C '%s'" % (btsync.archive_path, btsync.extract_path))
 
 @task
 @needs('mk_build_dir')
 def get_btsync_deb_src():
     """Checkout btsync-deb source from Github"""
     btsd=BtSyncDeb()
-    sh('curl -f %s -o %s' % (btsd.url, btsd.archive_path))
-    sh('tar -xvzf %s -C %s' % (btsd.archive_path, WORK_DIR))
+    sh("curl -f '%s' -o '%s'" % (btsd.url, btsd.archive_path))
+    sh("tar -xvzf '%s' -C '%s'" % (btsd.archive_path, WORK_DIR))
 
 @task
 @needs('get_btsync_deb_src')
@@ -66,6 +68,19 @@ def build_btsync_gui_locales():
         for sd in (pofile.namebase, 'LC_MESSAGES'):
             dstdir = dstdir / sd
             dstdir.mkdir(DIR_MODE)
-        sh('msgfmt -c %s -o %s' % (pofile, dstdir / 'btsync-gu.mo'))
+        sh("msgfmt -c '%s' -o '%s'" % (pofile, dstdir / 'btsync-gu.mo'))
 
+@task
+@needs('build_btsync_gui_locales')
+def install_btsync_gui():
+    btsd=BtSyncDeb()
+    with open(btsd.install_file, 'r') as f:
+        for l in f:
+            if re.match('^\s*(#|$)', l):
+                continue
+            src, dst = l.split()
+            src = btsd.gui_path / src
+            dst = TARGET_DIR / dst
+            dst.makedirs(DIR_MODE)
+            sh("cp --preserve=mode -frt '%s' '%s'" % (dst, src))
 
