@@ -25,6 +25,8 @@ class BtSync:
         self.binary_src_path = self.extract_path / 'btsync'
         self.binary_target_dir = targetdir / 'usr' / 'lib' / 'btsync-common'
         self.binary_target_path = self.binary_target_dir / 'btsync-core'
+        self.key_target_dir = targetdir / 'usr' / 'lib' / 'btsync-gui'
+        self.key_target_path = self.key_target_dir / 'btsync-gui.key'
 
 class BtSyncDeb:
     def __init__(self, tag='btsync-1.4.1-1', workdir=WORK_DIR):
@@ -97,3 +99,15 @@ def install_btsync_bin():
     sh("install -m %o '%s' '%s'" % (EXE_MODE, btsync.binary_src_path,
         btsync.binary_target_path))
 
+@task
+@needs('mk_build_dir')
+def install_api_token():
+    btsync = BtSync()
+    btsync.key_target_dir.makedirs(DIR_MODE)
+    path('btsync-api-token.txt').copyfile(btsync.key_target_path)
+
+@task
+@needs('mk_build_dir')
+def install_apprun():
+    sh("install -m %o '%s' '%s'" % (EXE_MODE, 'AppRun', TARGET_DIR / 'AppRun'))
+    
