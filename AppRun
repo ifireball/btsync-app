@@ -6,8 +6,9 @@ die() {
     exit 1
 }
 find_in_path() {
+    local path="$PWD:$PATH"
     local IFS=:
-    for sp in $PATH; do
+    for sp in $path; do
         if [ -x "$sp/$1" ]; then 
             echo "$sp/$1"
             return 0
@@ -18,10 +19,27 @@ find_in_path() {
 case "$0" in
     /*|./*|../*) 
         cd `dirname "$0"` > /dev/null || \
-            die 'I cannot CD to where this script was run from,' \ 
-                'So cannot invoke app. Sorry.';;
+            die 'I cannot CD to where this script was run from,' \
+                'So cannot invoke app. Sorry.'
+        ;;
     *)
-        #TODO find in path
+	fp=`find_in_path "$0"` && \
+            rp=`readlink -e "$fp"` && \
+            cd `dirname "$rp"` || \
+            die 'I cannot CD to where this script was run from,' \
+                'So cannot invoke app. Sorry.'
+        ;;
 esac
-
-#TODO: set env and run
+# Huristic test if we have the files we need
+test -x ./usr/bin/btsync-gui -a -x ./usr/lib/btsync-common/btsync-core -a \
+    -r ./usr/lib/btsync-gui/btsync-gui.key || \
+    die 'Cannot find parts of the App. Sorry.'
+# Setun environment
+PATH="$PWD/usr/bin:$PATH"
+export PATH
+LD_LIBRARY_PATH="$PWD/usr/lib"
+export LD_LIBRARY_PATH
+PYTHONPATH="$PWD/usr/lib:$PWD/usr/lib/btsync-gui"
+export PYTHONPATH
+# Run the app
+exec "$PWD/usr/bin/btsync-gui" "$@"

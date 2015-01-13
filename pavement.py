@@ -66,7 +66,7 @@ def get_btsync_deb_src():
 @task
 @needs('get_btsync_deb_src')
 def build_btsync_gui_locales():
-    """Build the BySyunc GUI locale files"""
+    """Build the BySync GUI locale files"""
     btsd=BtSyncDeb()
     locdir = btsd.gui_path / 'locale'
     locdir.mkdir(DIR_MODE)
@@ -80,6 +80,7 @@ def build_btsync_gui_locales():
 @task
 @needs('build_btsync_gui_locales')
 def install_btsync_gui():
+    """Install the BtSync GUI files to the AppDir"""
     btsd=BtSyncDeb()
     with open(btsd.install_file, 'r') as f:
         for l in f:
@@ -94,6 +95,7 @@ def install_btsync_gui():
 @task
 @needs('get_btsync_bin')
 def install_btsync_bin():
+    """Install the BtSync binary to the AppDir"""
     btsync = BtSync()
     btsync.binary_target_dir.makedirs(DIR_MODE)
     sh("install -m %o '%s' '%s'" % (EXE_MODE, btsync.binary_src_path,
@@ -102,6 +104,7 @@ def install_btsync_bin():
 @task
 @needs('mk_build_dir')
 def install_api_token():
+    """Install the API token to the AppDir"""
     btsync = BtSync()
     btsync.key_target_dir.makedirs(DIR_MODE)
     path('btsync-api-token.txt').copyfile(btsync.key_target_path)
@@ -109,5 +112,12 @@ def install_api_token():
 @task
 @needs('mk_build_dir')
 def install_apprun():
+    """Install the AppRun script in the AppDir"""
     sh("install -m %o '%s' '%s'" % (EXE_MODE, 'AppRun', TARGET_DIR / 'AppRun'))
     
+@task
+@needs(['install_btsync_gui', 'install_btsync_bin', 'install_api_token',
+    'install_apprun'])
+def install():
+    """Install everything to the AppDir"""
+    pass
