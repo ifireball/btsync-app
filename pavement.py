@@ -13,13 +13,12 @@ EXE_MODE=0755
 class BtSync:
     def __init__(self, version='1.4.103', platform='x86_64', workdir=WORK_DIR,
             targetdir=TARGET_DIR):
-        self.version = version
         self.platform = platform
         self.platform_nic = { 'x86_64': 'x64' }.get(self.platform, self.platform)
-        self.file_base_name = 'btsync_%s-%s' % (self.platform_nic, self.version)
+        self.file_base_name = 'btsync_%s-%s' % (self.platform_nic, version)
         self.archive_name = self.file_base_name + '.tar.gz'
         self.archive_path = workdir / self.archive_name
-        self.url ='http://syncapp.bittorrent.com/%s/%s' % (self.version,
+        self.url ='http://syncapp.bittorrent.com/%s/%s' % (version,
                 self.archive_name)
         self.extract_path = workdir / self.file_base_name
         self.binary_src_path = self.extract_path / 'btsync'
@@ -30,15 +29,23 @@ class BtSync:
 
 class BtSyncDeb:
     def __init__(self, tag='btsync-1.4.1-1', workdir=WORK_DIR):
-        self.tag = tag
-        self.file_base_name = 'btsync-deb-' + self.tag
+        self.file_base_name = 'btsync-deb-' + tag
         self.archive_name = self.file_base_name + '.zip'
         self.archive_path = workdir / self.archive_name
-        self.url = 'https://codeload.github.com/tuxpoldo/btsync-deb/tar.gz/%s' % (
-                self.tag)
+        self.url = \
+            'https://codeload.github.com/tuxpoldo/btsync-deb/tar.gz/' + tag
         self.extract_path = workdir / self.file_base_name
         self.gui_path = self.extract_path / 'btsync-gui'
         self.install_file = self.gui_path / 'debian' / 'btsync-gui-gtk.install'
+
+class qrencode:
+    def __init__(self, version='1.01', workdir=WORK_DIR, tagretdir=TARGET_DIR):
+        self.file_base_name = 'qrencode-' + version
+        self.archive_name = self.file_base_name + '.tar.gz'
+        self.archive_path = workdir / self.archive_name
+        self.url = 'https://pypi.python.org/packages/source/q/qrencode' + \
+                self.archive_name
+        self.extract_path = workdir / self.file_base_name
 
 @task
 def mk_build_dir():
