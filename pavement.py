@@ -10,6 +10,35 @@ TARGET_DIR=BUILD_DIR / 'AppDir'
 DIR_MODE=0755
 EXE_MODE=0755
 
+class Package:
+    """Class for handling software packages"""
+
+    def __init__(self, version, name=None, 
+            remote_name=None, remote_prefix=None, 
+            local_name=None, local_prefix=None, 
+            url=None, urlbase=None,
+            workdir=WORK_DIR, dir_in_archive=True, dirmode=DIR_MODE):
+        assert url or urlbase
+        self.remote_name = (remote_prefix and remote_prefix + '-' or '') + \
+                (remote_name or name or self.name_from_class()) + '-' + version
+        self.local_name = (local_prefix and local_prefix + '-' or '') + \
+                (local_name or name or self.name_from_class()) + '-' + version
+        self.remote_archive_name = self.remote_name + '.tar.gz'
+        self.local_archive_name = self.local_name + '.tar.gz'
+        self.url = url or (urlbase + '/' + self.remote_archive_name)
+        self.local_archive_path = wordir / self.local_archive_name
+        self.extract_path = workdir / self.local_name
+        self._dirmode = dirmode
+        self._dir_in_archive = dir_in_archive
+
+    def download_and_extract(self):
+        """Download and extract the package"""
+        sh("curl -f '%s' -o '%s'" % (self.url, self.local_archive_path))
+        if self._dir_in_archive:
+            btsync.extract_path.mkdir(self._dirmode)
+        sh("tar -xvzf '%s' -C '%s'" % (btsync.local_archive_path, btsync.extract_path))
+
+
 class BtSync:
     def __init__(self, version='1.4.103', platform='x86_64', workdir=WORK_DIR,
             targetdir=TARGET_DIR):
@@ -38,7 +67,7 @@ class BtSyncDeb:
         self.gui_path = self.extract_path / 'btsync-gui'
         self.install_file = self.gui_path / 'debian' / 'btsync-gui-gtk.install'
 
-class qrencode:
+class python_qrencode:
     def __init__(self, version='1.01', workdir=WORK_DIR, tagretdir=TARGET_DIR):
         self.file_base_name = 'qrencode-' + version
         self.archive_name = self.file_base_name + '.tar.gz'
