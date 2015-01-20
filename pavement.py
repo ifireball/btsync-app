@@ -7,6 +7,8 @@ import re
 BUILD_DIR=path('build')
 WORK_DIR=BUILD_DIR / 'tmp'
 TARGET_DIR=BUILD_DIR / 'AppDir'
+BUILD_PREFIX='/_nowhere_'
+TARGET_PREFIX=TARGET_DIR / 'usr'
 DIR_MODE=0755
 EXE_MODE=0755
 
@@ -83,9 +85,16 @@ class BTSyncDeb(Package):
         self.gui_path = self.extract_path / 'btsync-gui'
         self.install_file = self.gui_path / 'debian' / 'btsync-gui-gtk.install'
 
+class QREncode(Package):
+    def __init__(self, version='3.4.4', workdir=WORK_DIR):
+        super(QREncode, self).__init__(version=version,
+                urlbase='http://fukuchi.org/works/qrencode',
+                workdir=workdir)
+
 class PythonQREncode(Package):
     def __init__(self, version='1.01', workdir=WORK_DIR, tagretdir=TARGET_DIR):
-        super(PythonQREncode).__init__(version=version, remote_name='qrencode',
+        super(PythonQREncode, self).__init__(version=version,
+                remote_name='qrencode',
                 urlbase='https://pypi.python.org/packages/source/q/qrencode',
                 workdir=workdir)
 
@@ -108,6 +117,18 @@ def get_btsync_deb_src():
     BTSyncDeb().download_and_extract()
 
 @task
+@needs('mk_build_dir')
+def get_qrencode_src():
+    """Download and extract qrencode sources"""
+    QREncode().download_and_extract()
+
+@task
+@needs('mk_build_dir')
+def get_python_qrencode_src():
+    """Download and extract python-qrencode sources"""
+    PythonQREncode().download_and_extract()
+
+@task
 @needs('get_btsync_deb_src')
 def build_btsync_gui_locales():
     """Build the BySync GUI locale files"""
@@ -120,6 +141,26 @@ def build_btsync_gui_locales():
             dstdir = dstdir / sd
             dstdir.mkdir(DIR_MODE)
         sh("msgfmt -c '%s' -o '%s'" % (pofile, dstdir / 'btsync-gu.mo'))
+
+@task
+@needs('get_qrencode_src')
+def build_qrencode():
+    """Build the qrencode library"""
+    with pushd(QREncode().extract_path):
+        sh("./configure --without-tools --without-tests --prefix='%s'" % \
+                (BUILD_PREFIX))
+        sh('make')
+
+@task
+@needs('get_python_qrencode_src', 'install_qrencode')
+def build_python_qrencode():
+    """Build the python-qrencode library"""
+    include_dir = (TARGET_PREFIX / 'include').abspath()
+    lib_dir = (TARGET_PREFIX / 'lib').abspath()
+    with pushd(PythonQREncode().extract_path):
+        sh(("python setup.py build --no-user-cfg --include-dirs='%s' " +\
+                "--library-dirs='%s' --rpath='%s'") % (include_dir, lib_dir,
+                    lib_dir))
 
 @task
 @needs('build_btsync_gui_locales')
@@ -158,6 +199,13 @@ def install_api_token():
 def install_apprun():
     """Install the AppRun script in the AppDir"""
     sh("install -m %o '%s' '%s'" % (EXE_MODE, 'AppRun', TARGET_DIR / 'AppRun'))
+
+@task
+@needs('build_qrencode')
+def install_qrencode():
+    abstgt=TARGET_PREFIX.abspath()
+    with pushd(QREncode().extract_path):
+        sh('make prefix=%s install' % (abstgt))
     
 @task
 @needs(['install_btsync_gui', 'install_btsync_bin', 'install_api_token',
