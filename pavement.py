@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # pavement.py - Paver file fore building BtSync AppImage
 #
-from paver.easy import path, task, needs, sh, pushd
 import re
+from os import environ
+from paver.easy import path, task, needs, sh, pushd
 
 BUILD_DIR=path('build')
 WORK_DIR=BUILD_DIR / 'tmp'
@@ -157,10 +158,10 @@ def build_python_qrencode():
     """Build the python-qrencode library"""
     include_dir = (TARGET_PREFIX / 'include').abspath()
     lib_dir = (TARGET_PREFIX / 'lib').abspath()
+    environ['CFLAGS'] = '-I' + include_dir
+    environ['LDFLAGS'] = '-L' + lib_dir
     with pushd(PythonQREncode().extract_path):
-        sh(("python setup.py build --no-user-cfg --include-dirs='%s' " +\
-                "--library-dirs='%s' --rpath='%s'") % (include_dir, lib_dir,
-                    lib_dir))
+        sh("python setup.py build")
 
 @task
 @needs('build_btsync_gui_locales')
@@ -208,8 +209,17 @@ def install_qrencode():
         sh('make prefix=%s install' % (abstgt))
     
 @task
-@needs(['install_btsync_gui', 'install_btsync_bin', 'install_api_token',
-    'install_apprun'])
+@needs('build_python_qrencode')
+def install_python_qrencode():
+    abstgt=TARGET_PREFIX.abspath()
+    abslib=(TARGET_PREFIX / 'lib' / 'python').abspath()
+    with pushd(PythonQREncode().extract_path):
+        sh("python setup.py install --home='%s' --install-lib='%s'" % (abstgt,
+            abslib))
+    
+@task
+@needs(['install_python_qrencode', 'install_btsync_gui', 'install_btsync_bin',
+    'install_api_token', 'install_apprun'])
 def install():
     """Install everything to the AppDir"""
     pass

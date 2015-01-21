@@ -39,7 +39,7 @@ PATH="$PWD/usr/bin:$PATH"
 export PATH
 LD_LIBRARY_PATH="$PWD/usr/lib"
 export LD_LIBRARY_PATH
-PYTHONPATH="$PWD/usr/lib:$PWD/usr/lib/btsync-gui"
+PYTHONPATH="$PWD/usr/lib/python:$PWD/usr/lib:$PWD/usr/lib/btsync-gui"
 export PYTHONPATH
 # Run the app
 exec "$PWD/usr/bin/btsync-gui" "$@"
