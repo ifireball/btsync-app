@@ -98,6 +98,7 @@ class PythonQREncode(Package):
                 remote_name='qrencode',
                 urlbase='https://pypi.python.org/packages/source/q/qrencode',
                 workdir=workdir)
+        self.patch = path('python_qrencode_fix_pillow_import.patch')
 
 @task
 def mk_build_dir():
@@ -156,11 +157,14 @@ def build_qrencode():
 @needs('get_python_qrencode_src', 'install_qrencode')
 def build_python_qrencode():
     """Build the python-qrencode library"""
+    pqre = PythonQREncode()
     include_dir = (TARGET_PREFIX / 'include').abspath()
     lib_dir = (TARGET_PREFIX / 'lib').abspath()
     environ['CFLAGS'] = '-I' + include_dir
     environ['LDFLAGS'] = '-L' + lib_dir
-    with pushd(PythonQREncode().extract_path):
+    patchabs = pqre.patch.abspath()
+    with pushd(pqre.extract_path):
+        sh("patch -p1 < '%s'" % (patchabs))
         sh("python setup.py build")
 
 @task
