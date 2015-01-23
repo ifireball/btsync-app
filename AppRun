@@ -41,5 +41,11 @@ LD_LIBRARY_PATH="$PWD/usr/lib"
 export LD_LIBRARY_PATH
 PYTHONPATH="$PWD/usr/lib/python:$PWD/usr/lib:$PWD/usr/lib/btsync-gui"
 export PYTHONPATH
+if [ -z "$XDG_DATA_DIRS" ]; then
+    XDG_DATA_DIRS="$PWD/usr/share:/usr/local/share:/usr/share"
+else
+    XDG_DATA_DIRS="$PWD/usr.share:$XDG_DATA_DIRS"
+fi
+export XDG_DATA_DIRS
 # Run the app
 exec "$PWD/usr/bin/btsync-gui" "$@"
