@@ -42,6 +42,11 @@ to work:
 
 - [Paver](https://pythonhosted.org/Paver/) - Available on RPM-based
   distributions as 'python-paver'
+- C compilation toolchain - For building Python extention libraries
+- [cmake](http://www.cmake.org/) - For building AppImageKit
+- [fuse](http://fuse.sourceforge.net/) development libraries - Also for
+  AppImageKit. It avalable as the 'fuse-devel' PRM package
+- libpng12 - To enable AppImage to run
 - A working internet connection - To enable the script to download additional
   stuff it needs 
 

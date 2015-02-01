@@ -1,0 +1,35 @@
+diff --git a/.travis.yml b/.travis.yml
+index 4100622..8fa71cb 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -4,7 +4,7 @@ compiler: gcc
+ before_install:
+  - sudo apt-add-repository -y ppa:vala-team/ppa
+  - sudo apt-get update -qq
+- - sudo apt-get install -qq libfuse-dev libglib2.0-dev cmake git libc6-dev binutils valac libgee-0.8-dev
++ - sudo apt-get install -qq libfuse-dev libglib2.0-dev cmake libc6-dev binutils valac libgee-0.8-dev gcc-multilib g++-multilib libc6-dev-i386
+  - cd ./LibcWrapGenerator
+  - valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 ./LibcWrapGenerator.vala
+  - sudo ./LibcWrapGenerator --target 2.7 --libdir /lib --output libcwrap.h
+@@ -12,7 +12,7 @@ before_install:
+  - cd -
+ 
+ script: 
+- - export CC='gcc -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
++ - export CC='gcc -m32 -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
+  - cmake . && make
+  - find . -type f
+ 
+diff --git a/AppImageAssistant.AppDir/xdg/IconTheme.py b/AppImageAssistant.AppDir/xdg/IconTheme.py
+index 3e5ff49..1699558 100644
+--- a/AppImageAssistant.AppDir/xdg/IconTheme.py
++++ b/AppImageAssistant.AppDir/xdg/IconTheme.py
+@@ -331,7 +331,7 @@ def LookupIcon(iconname, size, theme, extensions):
+         for subdir in theme.getDirectories():
+             for directory in icondirs:
+                 dir = os.path.join(directory,theme.name,subdir)
+-                if (cache not in ncache[theme.name][2] \
++                if (dir not in cache[theme.name][2] \
+                 or cache[theme.name][1] < os.path.getmtime(os.path.join(directory,theme.name))) \
+                 and subdir != "" \
+                 and os.path.isdir(dir):

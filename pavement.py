@@ -100,6 +100,13 @@ class PythonQREncode(Package):
                 workdir=workdir)
         self.patch = path('python_qrencode_fix_pillow_import.patch')
 
+class AppImageKit(Package):
+    def __init__(self, tag='1', workdir=WORK_DIR):
+        super(AppImageKit, self).__init__(version=tag, 
+                url='https://codeload.github.com/probonopd/AppImageKit/tar.gz/' +
+                tag, workdir=workdir)
+        self.patch = path('appimagekit_fix_icontheme.patch')
+
 @task
 def mk_build_dir():
     """Create directories to build the appdir in"""
@@ -129,6 +136,12 @@ def get_qrencode_src():
 def get_python_qrencode_src():
     """Download and extract python-qrencode sources"""
     PythonQREncode().download_and_extract()
+
+@task
+@needs('mk_build_dir')
+def get_appimagekit_src():
+    """Checkout AppImageKit source from Github"""
+    AppImageKit().download_and_extract()
 
 @task
 @needs('get_btsync_deb_src')
@@ -168,6 +181,17 @@ def build_python_qrencode():
         sh("python setup.py build")
 
 @task
+@needs('get_appimagekit_src')
+def build_appimagekit():
+    """Build the AppImahgeKit"""
+    aik = AppImageKit()
+    patchabs = aik.patch.abspath()
+    with pushd(aik.extract_path):
+        sh("patch -p1 < '%s'" % (patchabs))
+        sh("cmake .")
+        sh('make AppImageAssistant')
+
+@task
 @needs('build_btsync_gui_locales')
 def install_btsync_gui():
     """Install the BTSync GUI files to the AppDir"""
@@ -178,7 +202,12 @@ def install_btsync_gui():
                 continue
             src, dst = l.split()
             src = btsd.gui_path / src
-            dst = TARGET_DIR / dst
+            # The *.desktop file goes to the AppDir root to AppImageKit will
+            # find it
+            if src.ext == '.desktop':
+                dst = TARGET_DIR
+            else:
+                dst = TARGET_DIR / dst
             dst.makedirs(DIR_MODE)
             sh("cp --preserve=mode -frt '%s' '%s'" % (dst, src))
 
@@ -227,3 +256,8 @@ def install_python_qrencode():
 def install():
     """Install everything to the AppDir"""
     pass
+
+@task
+def clean():
+    """Delete all build artifacts"""
+    sh("rm -rf '%s'" % (BUILD_DIR))
