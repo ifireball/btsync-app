@@ -12,6 +12,8 @@ BUILD_PREFIX='/_nowhere_'
 TARGET_PREFIX=TARGET_DIR / 'usr'
 DIR_MODE=0755
 EXE_MODE=0755
+PLATFORM='x86_64'
+VERSION='0.1.0'
 
 class Package(object):
     """Class for handling software packages"""
@@ -64,7 +66,7 @@ class Package(object):
                 self.__class__.__name__)
 
 class BTSync(Package):
-    def __init__(self, version='1.4.103', platform='x86_64', workdir=WORK_DIR,
+    def __init__(self, version='1.4.103', platform=PLATFORM, workdir=WORK_DIR,
             targetdir=TARGET_DIR, dirmode=DIR_MODE):
         self.platform = platform
         self.platform_nic = { 'x86_64': 'x64' }.get(self.platform, self.platform)
@@ -106,6 +108,8 @@ class AppImageKit(Package):
                 url='https://codeload.github.com/probonopd/AppImageKit/tar.gz/' +
                 tag, workdir=workdir)
         self.patch = path('appimagekit_fix_icontheme.patch')
+        self.package_tool = self.extract_path / 'AppImageAssistant.AppDir' /\
+                'package'
 
 @task
 def mk_build_dir():
@@ -189,6 +193,7 @@ def build_appimagekit():
     with pushd(aik.extract_path):
         sh("patch -p1 < '%s'" % (patchabs))
         sh("cmake .")
+        sh('rm -f AppImageAssistant')
         sh('make AppImageAssistant')
 
 @task
@@ -237,6 +242,7 @@ def install_apprun():
 @task
 @needs('build_qrencode')
 def install_qrencode():
+    """Instrall the qrencode library"""
     abstgt=TARGET_PREFIX.abspath()
     with pushd(QREncode().extract_path):
         sh('make prefix=%s install' % (abstgt))
@@ -244,6 +250,7 @@ def install_qrencode():
 @task
 @needs('build_python_qrencode')
 def install_python_qrencode():
+    """Install the qrencode Python bindings"""
     abstgt=TARGET_PREFIX.abspath()
     abslib=(TARGET_PREFIX / 'lib' / 'python').abspath()
     with pushd(PythonQREncode().extract_path):
@@ -256,6 +263,15 @@ def install_python_qrencode():
 def install():
     """Install everything to the AppDir"""
     pass
+
+@task
+@needs(['install', 'build_appimagekit'])
+def mk_appimage():
+    """Create an AppImage containing the app and all dependencies"""
+    pt = AppImageKit().package_tool
+    target = BUILD_DIR / ('btsync-app-%s-%s' % (PLATFORM, VERSION))
+    sh("%s '%s' '%s'" % (pt, TARGET_DIR, target))
+
 
 @task
 def clean():

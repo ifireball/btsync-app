@@ -46,7 +46,17 @@ to work:
 - [cmake](http://www.cmake.org/) - For building AppImageKit
 - [fuse](http://fuse.sourceforge.net/) development libraries - Also for
   AppImageKit. It avalable as the 'fuse-devel' PRM package
-- libpng12 - To enable AppImage to run
 - A working internet connection - To enable the script to download additional
   stuff it needs 
 
+## Building and running
+
+To build the AppImage, run the following command:
+
+    paver mk_appimage
+
+Once the build process in done, the AppImage would be in the following path:
+
+    build/btsync-app-x86_64-0.1.0
+
+The AppImage is a binary executable file, it can be copied and run anywhere.
