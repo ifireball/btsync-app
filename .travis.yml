@@ -1,8 +1,21 @@
 language: python
 python:
-  - "2.7"
-install: 
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq libfuse-dev cmake libc6-dev binutils
-  - "pip install -r requirements.txt"
-script: paver mk_appimage
+- '2.7'
+install:
+- sudo apt-get update -qq
+- sudo apt-get install -qq libfuse-dev cmake libc6-dev binutils
+- pip install -r requirements.txt
+script:
+- paver mk_appimage
+before_deploy:
+- git fetch --tags
+deploy:
+  provider: releases
+  api_key:
+    secure: TrdL2oEziA8H/lxtER+4JtdvWFTzu3feSyExDBufcflMcz2S5ojxbPIufdIW0OFTG5Sp5TjY1ViuBZx666d5o3Gp1oqDWFXpfd4F0q4hsxdl2oY9mmef04Oc/Cnq+d0hArstqpBCEy7DcEUz/sd65nAyzhzCfGiVTYWaGFng8Ts=
+  skip_cleanup: true
+  file_glob: true
+  file: ./build/btsync-app-*
+  on:
+    tags: true
+    all_branches: true
