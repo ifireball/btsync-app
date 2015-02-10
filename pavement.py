@@ -102,6 +102,26 @@ class PythonQREncode(Package):
                 workdir=workdir)
         self.patch = path('python_qrencode_fix_pillow_import.patch')
 
+class PythonQREncode(Package):
+    def __init__(self, version='1.01', workdir=WORK_DIR, tagretdir=TARGET_DIR):
+        super(PythonQREncode, self).__init__(version=version,
+                remote_name='qrencode',
+                urlbase='https://pypi.python.org/packages/source/q/qrencode',
+                workdir=workdir)
+        self.patch = path('python_qrencode_fix_pillow_import.patch')
+
+class Urllib3(Package):
+    def __init__(self, version='1.8.2', workdir=WORK_DIR, tagretdir=TARGET_DIR):
+        super(Urllib3, self).__init__(version=version,
+                urlbase='https://pypi.python.org/packages/source/u/urllib3',
+                workdir=workdir)
+
+class Requests(Package):
+    def __init__(self, version='1.2.3', workdir=WORK_DIR, tagretdir=TARGET_DIR):
+        super(Requests, self).__init__(version=version,
+                urlbase='https://pypi.python.org/packages/source/r/requests',
+                workdir=workdir)
+
 class AppImageKit(Package):
     def __init__(self, tag='1', workdir=WORK_DIR):
         super(AppImageKit, self).__init__(version=tag, 
@@ -140,6 +160,18 @@ def get_qrencode_src():
 def get_python_qrencode_src():
     """Download and extract python-qrencode sources"""
     PythonQREncode().download_and_extract()
+
+@task
+@needs('mk_build_dir')
+def get_python_urllib3_src():
+    """Download and extract python-urllib3 sources"""
+    Urllib3().download_and_extract()
+
+@task
+@needs('mk_build_dir')
+def get_python_requests_src():
+    """Download and extract python-requests sources"""
+    Requests().download_and_extract()
 
 @task
 @needs('mk_build_dir')
@@ -182,6 +214,22 @@ def build_python_qrencode():
     patchabs = pqre.patch.abspath()
     with pushd(pqre.extract_path):
         sh("patch -p1 < '%s'" % (patchabs))
+        sh("python setup.py build")
+
+@task
+@needs('get_python_urllib3_src')
+def build_python_urllib3():
+    """Build the python-urllib3 library"""
+    pl = Urllib3()
+    with pushd(pl.extract_path):
+        sh("python setup.py build")
+
+@task
+@needs('get_python_requests_src')
+def build_python_requests():
+    """Build the python-requests library"""
+    pl = Requests()
+    with pushd(pl.extract_path):
         sh("python setup.py build")
 
 @task
@@ -254,6 +302,30 @@ def install_python_qrencode():
     abstgt=TARGET_PREFIX.abspath()
     abslib=(TARGET_PREFIX / 'lib' / 'python').abspath()
     with pushd(PythonQREncode().extract_path):
+        sh("python setup.py install --home='%s' --install-lib='%s'" % (abstgt,
+            abslib))
+    
+@task
+@needs('build_python_urllib3')
+def install_python_urllib3():
+    """Install the urllib3 Python library"""
+    abstgt=TARGET_PREFIX.abspath()
+    abslib=(TARGET_PREFIX / 'lib' / 'python').abspath()
+    environ['PYTHONPATH'] = (environ.has_key('PYTHONPATH') and
+            environ['PYTHONPATH'] + ':' or '') + abslib
+    with pushd(Urllib3().extract_path):
+        sh("python setup.py install --home='%s' --install-lib='%s'" % (abstgt,
+            abslib))
+    
+@task
+@needs('build_python_requests')
+def install_python_requests():
+    """Install the requests Python library"""
+    abstgt=TARGET_PREFIX.abspath()
+    abslib=(TARGET_PREFIX / 'lib' / 'python').abspath()
+    environ['PYTHONPATH'] = (environ.has_key('PYTHONPATH') and
+            environ['PYTHONPATH'] + ':' or '') + abslib
+    with pushd(Requests().extract_path):
         sh("python setup.py install --home='%s' --install-lib='%s'" % (abstgt,
             abslib))
     
