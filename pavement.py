@@ -330,7 +330,8 @@ def install_python_requests():
             abslib))
     
 @task
-@needs(['install_python_qrencode', 'install_btsync_gui', 'install_btsync_bin',
+@needs(['install_python_qrencode', 'install_python_urllib3',
+    'install_python_requests', 'install_btsync_gui', 'install_btsync_bin',
     'install_api_token', 'install_apprun'])
 def install():
     """Install everything to the AppDir"""

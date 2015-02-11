@@ -12,7 +12,15 @@ The built AppImage will include the GUI created for the
 [4]: https://travis-ci.org/ifireball/btsync-app.svg?branch=master
 [5]: https://travis-ci.org/ifireball/btsync-app
 
-## Runtime Requirements
+## Compatibility
+
+The AppImage is (hopefully) built in such a way that would enable it to run on
+many Linux distributions. That being said, it had only been tested on Fedora 20
+so far.
+
+Binary components included in the AppImage are currtly compatible only with
+64bit intel-based processors (x86-64). Patches to add components for other
+platforms are welcome.
 
 Ideally the AppImage created by this script would require nothing but a minimal
 desktop user space on top of a Linux kernel. But for now, in order to keep the
@@ -22,16 +30,6 @@ are available on most Linux desktops:
 - Python 2
 - PyGTK
 
-## Compatibility
-
-The AppImage is (hopefully) built in such a way that would enable it to run on
-many Linux distributions. That being said, it had only been tested on Fedora 20
-so far.
-
-Binary components included in the AppImage are currtly compatible only with
-64bit intel-based processors (x86-64). Patches to add components for other
-pltaforms are welcome.
-
 ## Bundled Stuff
 
 Apart from the main components mentioned above, the following libraries are also
@@ -40,6 +38,8 @@ the build system as the sources are downloaded and built by the build process.
 
 - [libqrencde](http://fukuchi.org/works/qrencode/)
 - [qrencode Python library](https://pypi.python.org/pypi/qrencode)
+- [urllib3 Python library](https://pypi.python.org/pypi/urllib3)
+- [requests Python library](http://docs.python-requests.org/en/latest/)
 
 ## Build Requirements
 
