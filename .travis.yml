@@ -5,10 +5,10 @@ install:
 - sudo apt-get update -qq
 - sudo apt-get install -qq libfuse-dev cmake libc6-dev binutils
 - pip install -r requirements.txt
+before_script:
+- git fetch --tags
 script:
 - paver mk_appimage
-before_deploy:
-- git fetch --tags
 deploy:
   provider: releases
   api_key:
