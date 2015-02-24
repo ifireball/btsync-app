@@ -55,7 +55,7 @@ def get_git_version(fallback='0.0.0', abbrev=4, prefix='v'):
 
     # If still no version, use the given fallback value
     if version is None:
-        vaersion = fallback
+        version = fallback
 
     # If we still don't have anything, that's an error.
     if version is None:
