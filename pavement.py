@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # pavement.py - Paver file fore building BtSync AppImage
 #
+import sys
+if not '' in sys.path:
+    sys.path.insert(0, '')
+
 import re
 from os import environ
 from paver.easy import path, task, needs, sh, pushd
+from version import get_git_version
 
 BUILD_DIR=path('build')
 WORK_DIR=BUILD_DIR / 'tmp'
@@ -13,7 +18,7 @@ TARGET_PREFIX=TARGET_DIR / 'usr'
 DIR_MODE=0755
 EXE_MODE=0755
 PLATFORM='x86_64'
-VERSION='0.1.0'
+VERSION=get_git_version()
 
 class Package(object):
     """Class for handling software packages"""
