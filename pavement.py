@@ -92,6 +92,7 @@ class BTSyncDeb(Package):
                 tag, workdir=workdir)
         self.gui_path = self.extract_path / 'btsync-gui'
         self.install_file = self.gui_path / 'debian' / 'btsync-gui-gtk.install'
+        self.patch = path('btsync_deb_appindicator_path.patch')
 
 class QREncode(Package):
     def __init__(self, version='3.4.4', workdir=WORK_DIR):
@@ -186,8 +187,8 @@ def get_appimagekit_src():
 
 @task
 @needs('get_btsync_deb_src')
-def build_btsync_gui_locales():
-    """Build the BySync GUI locale files"""
+def build_btsync_gui():
+    """Build the BySync GUI"""
     btsd=BTSyncDeb()
     locdir = btsd.gui_path / 'locale'
     locdir.mkdir(DIR_MODE)
@@ -197,6 +198,9 @@ def build_btsync_gui_locales():
             dstdir = dstdir / sd
             dstdir.mkdir(DIR_MODE)
         sh("msgfmt -c '%s' -o '%s'" % (pofile, dstdir / 'btsync-gu.mo'))
+    patchabs = btsd.patch.abspath()
+    with pushd(btsd.extract_path):
+        sh("patch -p1 < '%s'" % (patchabs))
 
 @task
 @needs('get_qrencode_src')
@@ -250,7 +254,7 @@ def build_appimagekit():
         sh('make AppImageAssistant')
 
 @task
-@needs('build_btsync_gui_locales')
+@needs('build_btsync_gui')
 def install_btsync_gui():
     """Install the BTSync GUI files to the AppDir"""
     btsd=BTSyncDeb()

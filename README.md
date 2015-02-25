@@ -15,8 +15,17 @@ The built AppImage will include the GUI created for the
 ## Compatibility
 
 The AppImage is (hopefully) built in such a way that would enable it to run on
-many Linux distributions. That being said, it had only been tested on Fedora 20
-so far.
+many Linux distributions. That being said, it had only been tested on the
+following OSes so far:
+
+- Fedora 20
+- Ubuntu 14.10
+
+The binary downloadable AppImage was also tested and shown not to run on the
+following OSes. It is quite likely that running the build system on thos OSes
+will result in a working AppImage for them:
+
+- RHEL/CentOS 6.x
 
 Binary components included in the AppImage are currtly compatible only with
 64bit intel-based processors (x86-64). Patches to add components for other
