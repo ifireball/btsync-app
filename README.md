@@ -61,6 +61,10 @@ to work:
 - [cmake](http://www.cmake.org/) - For building AppImageKit
 - [fuse](http://fuse.sourceforge.net/) development libraries - Also for
   AppImageKit. It avalable as the 'fuse-devel' PRM package
+- [Vala compiler](https://wiki.gnome.org/Projects/Vala) - For building libc
+  compatibility tool. It is available is the 'vala-devel' RPM package
+- [libgee](https://wiki.gnome.org/Projects/Libgee) - Also for building the
+  vala-based libc compatibility tool. Availabel as the 'libgee-devel' package.
 - A working internet connection - To enable the script to download additional
   stuff it needs 
 

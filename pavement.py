@@ -136,6 +136,11 @@ class AppImageKit(Package):
         self.patch = path('appimagekit_fix_icontheme.patch')
         self.package_tool = self.extract_path / 'AppImageAssistant.AppDir' /\
                 'package'
+        self.libc_wrap_gen_path = self.extract_path / 'LibcWrapGenerator'
+        self.libc_wrap_gen_src = self.libc_wrap_gen_path /\
+                'LibcWrapGenerator.vala'
+        self.libc_wrap_gen = self.libc_wrap_gen_path / 'LibcWrapGenerator'
+        self.libc_wrap_h = self.libc_wrap_gen_path / 'libcwrap.h'
 
 @task
 def mk_build_dir():
@@ -248,10 +253,17 @@ def build_appimagekit():
     aik = AppImageKit()
     patchabs = aik.patch.abspath()
     with pushd(aik.extract_path):
-        sh("patch -p1 < '%s'" % (patchabs))
+        sh("patch -p1 < '%s'" % (patchabs,))
         sh("cmake .")
         sh('rm -f AppImageAssistant')
         sh('make AppImageAssistant')
+    lcwgsabs = aik.libc_wrap_gen_src.abspath()
+    with pushd(aik.libc_wrap_gen_path):
+        sh("valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 '%s'" %
+                (lcwgsabs,))
+    sh("%s --target 2.7 --libdir /lib --output '%s'" % \
+            (aik.libc_wrap_gen, aik.libc_wrap_h))
+
 
 @task
 @needs('build_btsync_gui')
