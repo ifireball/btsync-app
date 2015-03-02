@@ -20,14 +20,15 @@ following OSes so far:
 
 - Fedora 20
 - Ubuntu 14.10
+- RHEL/CentOS 7.x
 
 The binary downloadable AppImage was also tested and shown not to run on the
-following OSes. It is quite likely that running the build system on thos OSes
+following OSes. It is quite likely that running the build system on those OSes
 will result in a working AppImage for them:
 
 - RHEL/CentOS 6.x
 
-Binary components included in the AppImage are currtly compatible only with
+Binary components included in the AppImage are currently compatible only with
 64bit intel-based processors (x86-64). Patches to add components for other
 platforms are welcome.
 
@@ -57,14 +58,18 @@ to work:
 
 - [Paver](https://pythonhosted.org/Paver/) - Available on RPM-based
   distributions as 'python-paver'
-- C compilation toolchain - For building Python extention libraries
+- C compilation toolchain - For building Python extension libraries
 - [cmake](http://www.cmake.org/) - For building AppImageKit
 - [fuse](http://fuse.sourceforge.net/) development libraries - Also for
-  AppImageKit. It avalable as the 'fuse-devel' PRM package
+  AppImageKit. It available as the 'fuse-devel' PRM package
 - [Vala compiler](https://wiki.gnome.org/Projects/Vala) - For building libc
   compatibility tool. It is available is the 'vala-devel' RPM package
 - [libgee](https://wiki.gnome.org/Projects/Libgee) - Also for building the
-  vala-based libc compatibility tool. Availabel as the 'libgee-devel' package.
+  Vala-based libc compatibility tool. Available as the 'libgee-devel' RPM
+  package. The tool requires version 0.8 of the libgee API (Which is
+  paradoxically newer then the 1.0 version). On Ubuntu this requires the
+  'libgee-0.8-devel' package. For older Ubunto versions it is available from
+  the [Vala PPA](ppa:vala-team/ppa).
 - A working internet connection - To enable the script to download additional
   stuff it needs 
 
@@ -74,8 +79,8 @@ To build the AppImage, run the following command:
 
     paver mk_appimage
 
-Once the build process in done, the AppImage would be in the following path:
+Once the build process is done, the AppImage would be in the following path:
 
-    build/btsync-app-x86_64-0.1.0
+    build/btsync-app-x86_64-*
 
 The AppImage is a binary executable file, it can be copied and run anywhere.
