@@ -9,6 +9,7 @@ import re
 from os import environ
 from paver.easy import path, task, needs, sh, pushd
 from version import get_git_version
+from ldd import findlibc
 
 BUILD_DIR=path('build')
 WORK_DIR=BUILD_DIR / 'tmp'
@@ -251,18 +252,21 @@ def build_python_requests():
 def build_appimagekit():
     """Build the AppImahgeKit"""
     aik = AppImageKit()
+    lcwgsabs = aik.libc_wrap_gen_src.abspath()
+    with pushd(aik.libc_wrap_gen_path):
+        sh("valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 '%s'" %
+                (lcwgsabs,))
+    libdir = path(findlibc(aik.libc_wrap_gen)).dirname()
+    sh("%s --target 2.7 --libdir '%s' --output '%s'" % \
+            (aik.libc_wrap_gen, libdir, aik.libc_wrap_h))
+    environ['CC'] = "gcc -U_FORTIFY_SOURCE -include '%s'" % \
+            (aik.libc_wrap_h.abspath(),)
     patchabs = aik.patch.abspath()
     with pushd(aik.extract_path):
         sh("patch -p1 < '%s'" % (patchabs,))
         sh("cmake .")
         sh('rm -f AppImageAssistant')
         sh('make AppImageAssistant')
-    lcwgsabs = aik.libc_wrap_gen_src.abspath()
-    with pushd(aik.libc_wrap_gen_path):
-        sh("valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 '%s'" %
-                (lcwgsabs,))
-    sh("%s --target 2.7 --libdir /lib --output '%s'" % \
-            (aik.libc_wrap_gen, aik.libc_wrap_h))
 
 
 @task
