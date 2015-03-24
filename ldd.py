@@ -1,9 +1,20 @@
 #!/usr/bin/env python
 # ldd.py - Python wrapper around ldd
 #
-from subprocess import check_output, CalledProcessError
+import subprocess 
 import re
 import sys
+
+if hasattr(subprocess, 'check_output'):
+    check_output = subprocess.check_output
+else:
+    def check_output(args):
+        p = subprocess.Popen(args, close_fds = True, stdout = subprocess.PIPE)
+        output, unused_err = p.communicate()
+        retcode = p.poll()
+        if retcode:
+            raise subprocess.CalledProcessError(retcode, args, output=output)
+        return output
 
 def ldd(binary):
     """Run the ldd program on the given binary file returning output as a

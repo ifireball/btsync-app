@@ -304,7 +304,7 @@ def install_api_token():
     """Install the API token to the AppDir"""
     btsync = BTSync()
     btsync.key_target_dir.makedirs(DIR_MODE)
-    path('btsync-api-token.txt').copyfile(btsync.key_target_path)
+    path('btsync-api-token.txt').copy(btsync.key_target_path)
 
 @task
 @needs('mk_build_dir')
