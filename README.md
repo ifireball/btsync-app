@@ -39,6 +39,7 @@ are available on most Linux desktops:
 
 - Python 2
 - PyGTK
+- python-argparse
 
 ## Bundled Stuff
 
@@ -60,6 +61,9 @@ to work:
 - [Paver](https://pythonhosted.org/Paver/) - Available on RPM-based
   distributions as 'python-paver'
 - C compilation toolchain - For building Python extension libraries
+- Python development libraries - For building Python extension
+  libraries. Available as 'python-devel' RPM package or 'python-dev' DEB
+  package
 - [cmake](http://www.cmake.org/) - For building AppImageKit
 - [fuse](http://fuse.sourceforge.net/) development libraries - Also for
   AppImageKit. It available as the 'fuse-devel' PRM package
