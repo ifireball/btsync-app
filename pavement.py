@@ -129,6 +129,12 @@ class Requests(Package):
                 urlbase='https://pypi.python.org/packages/source/r/requests',
                 workdir=workdir)
 
+class Pillow(Package):
+    def __init__(self, version='2.7.0', workdir=WORK_DIR, tagretdir=TARGET_DIR):
+        super(Pillow, self).__init__(name='Pillow', version=version,
+                urlbase='https://pypi.python.org/packages/source/P/Pillow',
+                workdir=workdir)
+
 class AppImageKit(Package):
     def __init__(self, tag='1', workdir=WORK_DIR):
         super(AppImageKit, self).__init__(version=tag, 
@@ -184,6 +190,12 @@ def get_python_urllib3_src():
 def get_python_requests_src():
     """Download and extract python-requests sources"""
     Requests().download_and_extract()
+
+@task
+@needs('mk_build_dir')
+def get_python_pillow_src():
+    """Download and extract python-pillow sources"""
+    Pillow().download_and_extract()
 
 @task
 @needs('mk_build_dir')
@@ -244,6 +256,14 @@ def build_python_urllib3():
 def build_python_requests():
     """Build the python-requests library"""
     pl = Requests()
+    with pushd(pl.extract_path):
+        sh("python setup.py build")
+
+@task
+@needs('get_python_pillow_src')
+def build_python_pillow():
+    """Build the python-pillow library"""
+    pl = Pillow()
     with pushd(pl.extract_path):
         sh("python setup.py build")
 
@@ -355,9 +375,21 @@ def install_python_requests():
             abslib))
     
 @task
+@needs('build_python_pillow')
+def install_python_pillow():
+    """Install the pillow Python library"""
+    abstgt=TARGET_PREFIX.abspath()
+    abslib=(TARGET_PREFIX / 'lib' / 'python').abspath()
+    environ['PYTHONPATH'] = (environ.has_key('PYTHONPATH') and
+            environ['PYTHONPATH'] + ':' or '') + abslib
+    with pushd(Pillow().extract_path):
+        sh("python setup.py install --home='%s' --install-lib='%s'" % (abstgt,
+            abslib))
+    
+@task
 @needs(['install_python_qrencode', 'install_python_urllib3',
-    'install_python_requests', 'install_btsync_gui', 'install_btsync_bin',
-    'install_api_token', 'install_apprun'])
+    'install_python_requests', 'install_python_pillow', 'install_btsync_gui',
+    'install_btsync_bin', 'install_api_token', 'install_apprun'])
 def install():
     """Install everything to the AppDir"""
     pass

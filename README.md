@@ -50,6 +50,7 @@ the build system as the sources are downloaded and built by the build process.
 - [qrencode Python library](https://pypi.python.org/pypi/qrencode)
 - [urllib3 Python library](https://pypi.python.org/pypi/urllib3)
 - [requests Python library](http://docs.python-requests.org/en/latest/)
+- [Pillow Python library](https://pypi.python.org/pypi/Pillow)
 
 ## Build Requirements
 
